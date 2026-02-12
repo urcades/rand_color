@@ -21,6 +21,14 @@ This repository is a Cargo workspace for random color generation across multiple
 - Use `rand_color` for a unified entrypoint across spaces.
 - Use `rand_color_convert` directly if you only need conversion helpers.
 
+## Maintenance mode
+
+This workspace is now feature-frozen and maintained in bugfix/security mode.
+
+- New color spaces or major API additions are out of scope unless there is a clear correctness or compatibility need.
+- Existing APIs and crate boundaries are intended to remain stable.
+- Contributions are welcome for bug fixes, docs fixes, CI/release reliability, and security updates.
+
 ## Quick start (`rand_color`)
 
 ```rust
@@ -53,3 +61,6 @@ make release-publish
 ```
 
 The publish script enforces dependency-safe release order.
+
+For security reporting and patch process details, see `SECURITY.md`.
+For the release checklist and publish order, see `RELEASE.md`.

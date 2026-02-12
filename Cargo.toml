@@ -17,8 +17,8 @@ resolver = "2"
 authors = ["Édouard Urcades <edouard@urcad.es>"]
 edition = "2021"
 license = "MIT"
-repository = "https://github.com/urcades/rand_rgb"
-homepage = "https://github.com/urcades/rand_rgb"
+repository = "https://github.com/urcades/rand_color"
+homepage = "https://github.com/urcades/rand_color"
 
 [workspace.dependencies]
 rand = "0.8.5"
