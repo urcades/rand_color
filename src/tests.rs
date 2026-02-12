@@ -1,30 +1,67 @@
-use crate::RandomColor;
+use crate::{random_color, random_color_in, ColorError, ColorRange, RandomColor};
 
 #[test]
-    fn color_to_struct_works() {
-        let random_color = RandomColor::rand_color_struct(100, 200, 100, 200, 33, 200, 0.0, 1.0);
-        println!("This is a random color struct: {:?}", random_color);
+fn random_color_defaults_are_in_bounds() {
+    let color = random_color();
+
+    assert!((0.0..=1.0).contains(&color.alpha));
+    assert!(color.to_rgba_string().starts_with("rgba("));
 }
 
 #[test]
-fn color_to_string_works() {
-    let random_color = RandomColor::rand_color_string(100, 200, 100, 200, 33, 200, 0.0, 1.0);
-    println!("This is a random color string: {}", random_color);
+fn random_color_with_custom_range_is_in_bounds() {
+    let range = ColorRange::new(100, 200, 100, 200, 33, 200, 0.2, 0.8).unwrap();
+    let color = random_color_in(range).unwrap();
+
+    assert!((100..=200).contains(&color.red));
+    assert!((100..=200).contains(&color.green));
+    assert!((33..=200).contains(&color.blue));
+    assert!((0.2..=0.8).contains(&color.alpha));
 }
 
 #[test]
-fn color_to_struct_range_works() {
-    let min_red = 100;
-    let max_red = 200;
-    let min_green = 100;
-    let max_green = 200;
-    let min_blue = 33;
-    let max_blue = 200;
-    let min_alpha = 0.0;
-    let max_alpha = 1.0;
-    let random_color = RandomColor::rand_color_struct(min_red, max_red, min_green, max_green, min_blue, max_blue, min_alpha, max_alpha);
-    assert!(random_color.red >= min_red && random_color.red <= max_red);
-    assert!(random_color.green >= min_green && random_color.green <= max_green);
-    assert!(random_color.blue >= min_blue && random_color.blue <= max_blue);
-    assert!(random_color.alpha >= min_alpha && random_color.alpha <= max_alpha);
+fn invalid_channel_range_returns_error() {
+    let result = ColorRange::new(200, 100, 100, 200, 33, 200, 0.0, 1.0);
+    assert_eq!(result, Err(ColorError::InvalidChannelRange));
+}
+
+#[test]
+fn invalid_alpha_range_returns_error() {
+    let result = ColorRange::new(100, 200, 100, 200, 33, 200, 0.8, 0.2);
+    assert_eq!(result, Err(ColorError::InvalidAlphaRange));
+}
+
+#[test]
+fn out_of_bounds_alpha_returns_error() {
+    let result = ColorRange::new(100, 200, 100, 200, 33, 200, -0.1, 0.5);
+    assert_eq!(result, Err(ColorError::AlphaOutOfBounds));
+}
+
+#[test]
+fn rgba_string_is_formatted_with_two_decimals() {
+    let color = RandomColor {
+        red: 10,
+        green: 20,
+        blue: 30,
+        alpha: 0.1234,
+    };
+    assert_eq!(color.to_rgba_string(), "rgba(10, 20, 30, 0.12)");
+}
+
+#[test]
+#[allow(deprecated)]
+fn deprecated_struct_api_still_works() {
+    let color = RandomColor::rand_color_struct(100, 200, 100, 200, 33, 200, 0.0, 1.0);
+
+    assert!((100..=200).contains(&color.red));
+    assert!((100..=200).contains(&color.green));
+    assert!((33..=200).contains(&color.blue));
+    assert!((0.0..=1.0).contains(&color.alpha));
+}
+
+#[test]
+#[allow(deprecated)]
+fn deprecated_string_api_still_works() {
+    let color = RandomColor::rand_color_string(100, 200, 100, 200, 33, 200, 0.0, 1.0);
+    assert!(color.starts_with("rgba("));
 }

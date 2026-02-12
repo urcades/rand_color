@@ -1,14 +1,16 @@
 [package]
 name = "rand_rgb"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Édouard Urcades <edouard@urcad.es>"]
 edition = "2021"
 description = "Generate a random rgba-formatted color."
 license = "MIT"
 repository = "https://github.com/urcades/rand_rgb"
+homepage = "https://github.com/urcades/rand_rgb"
+documentation = "https://docs.rs/rand_rgb"
 readme = "readme.md"
 keywords = ["color", "rgb"]
-categories = ["Web programming", "Development tools"]
+categories = ["graphics", "development-tools"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
