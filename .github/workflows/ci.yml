@@ -20,13 +20,13 @@ jobs:
           components: rustfmt, clippy
 
       - name: Check formatting
-        run: cargo fmt -- --check
+        run: cargo fmt --all -- --check
 
       - name: Lint
-        run: cargo clippy --all-targets --all-features -- -D warnings
+        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
 
       - name: Test
-        run: cargo test --all-features
+        run: cargo test --workspace --all-features
 
       - name: Build docs
-        run: cargo doc --all-features --no-deps
+        run: cargo doc --workspace --all-features --no-deps

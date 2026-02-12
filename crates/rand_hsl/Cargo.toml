@@ -1,0 +1,21 @@
+[package]
+name = "rand_hsl"
+version = "0.1.0"
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/rand_hsl"
+readme = "README.md"
+description = "Generate random HSL/HSLA colors with configurable ranges."
+keywords = ["color", "hsl", "hsla"]
+categories = ["graphics", "development-tools"]
+
+[features]
+default = []
+serde = ["dep:serde"]
+
+[dependencies]
+rand.workspace = true
+serde = { workspace = true, optional = true }

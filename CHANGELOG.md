@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Cargo workspace structure with new crates:
+  - `rand_color` (umbrella crate)
+  - `rand_hsl` (HSL-focused crate)
+- Workspace-level CI checks for format, clippy, test, and docs.
+
+### Changed
+- Existing `rand_rgb` crate moved under `crates/rand_rgb` and prepared as a compatibility-focused crate for the workspace era.
+- Repository README now documents workspace crate map and recommended usage.
+
 ## [0.2.0] - 2026-02-12
 
 ### Added

@@ -1,23 +1,14 @@
-[package]
-name = "rand_rgb"
-version = "0.2.0"
+[workspace]
+members = ["crates/rand_rgb", "crates/rand_hsl", "crates/rand_color"]
+resolver = "2"
+
+[workspace.package]
 authors = ["Édouard Urcades <edouard@urcad.es>"]
 edition = "2021"
-description = "Generate a random rgba-formatted color."
 license = "MIT"
 repository = "https://github.com/urcades/rand_rgb"
 homepage = "https://github.com/urcades/rand_rgb"
-documentation = "https://docs.rs/rand_rgb"
-readme = "readme.md"
-keywords = ["color", "rgb"]
-categories = ["graphics", "development-tools"]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[features]
-default = []
-serde = ["dep:serde"]
-
-[dependencies]
+[workspace.dependencies]
 rand = "0.8.5"
-serde = { version = "1.0", features = ["derive"], optional = true }
+serde = { version = "1.0", features = ["derive"] }
