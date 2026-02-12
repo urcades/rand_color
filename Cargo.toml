@@ -21,6 +21,6 @@ repository = "https://github.com/urcades/rand_color"
 homepage = "https://github.com/urcades/rand_color"
 
 [workspace.dependencies]
-rand = "0.8.5"
+rand = "0.10.0"
 serde = { version = "1.0", features = ["derive"] }
 proptest = "1.6"
