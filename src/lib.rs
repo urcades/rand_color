@@ -7,6 +7,7 @@ use std::fmt;
 use std::ops::RangeInclusive;
 
 /// Represents a randomly generated `rgba()` color value.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct RandomColor {
     pub red: u8,
@@ -35,7 +36,14 @@ impl RandomColor {
     /// assert_eq!(color.to_rgba_string(), "rgba(179, 134, 103, 0.33)");
     /// ```
     pub fn to_rgba_string(&self) -> String {
-        format!(
+        self.to_string()
+    }
+}
+
+impl fmt::Display for RandomColor {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
             "rgba({}, {}, {}, {:.2})",
             self.red, self.green, self.blue, self.alpha
         )
@@ -43,6 +51,7 @@ impl RandomColor {
 }
 
 /// User-provided channel bounds for random generation.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct ColorRange {
     pub red: RangeInclusive<u8>,
@@ -100,6 +109,7 @@ impl ColorRange {
 }
 
 /// Error returned when color bounds are invalid.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ColorError {
     InvalidChannelRange,
@@ -137,7 +147,32 @@ impl Error for ColorError {}
 /// assert!((0.0..=1.0).contains(&color.alpha));
 /// ```
 pub fn random_color() -> RandomColor {
-    random_color_in(ColorRange::default()).expect("default color range should always be valid")
+    let mut rng = rand::thread_rng();
+    random_color_with_rng(&mut rng)
+}
+
+/// Generates a random color using default bounds and a caller-provided RNG.
+///
+/// This is useful for deterministic tests.
+///
+/// # Examples
+///
+/// ```rust
+/// use rand::rngs::StdRng;
+/// use rand::SeedableRng;
+/// use rand_rgb::random_color_with_rng;
+///
+/// let mut rng_a = StdRng::seed_from_u64(42);
+/// let mut rng_b = StdRng::seed_from_u64(42);
+///
+/// assert_eq!(
+///     random_color_with_rng(&mut rng_a),
+///     random_color_with_rng(&mut rng_b)
+/// );
+/// ```
+pub fn random_color_with_rng<R: Rng + ?Sized>(rng: &mut R) -> RandomColor {
+    random_color_in_with_rng(ColorRange::default(), rng)
+        .expect("default color range should always be valid")
 }
 
 /// Generates a random color using custom bounds.
@@ -146,60 +181,42 @@ pub fn random_color() -> RandomColor {
 ///
 /// Returns a [`ColorError`] when provided bounds are invalid.
 pub fn random_color_in(range: ColorRange) -> Result<RandomColor, ColorError> {
+    let mut rng = rand::thread_rng();
+    random_color_in_with_rng(range, &mut rng)
+}
+
+/// Generates a random color using custom bounds and a caller-provided RNG.
+///
+/// # Errors
+///
+/// Returns a [`ColorError`] when provided bounds are invalid.
+///
+/// # Examples
+///
+/// ```rust
+/// use rand::rngs::StdRng;
+/// use rand::SeedableRng;
+/// use rand_rgb::{random_color_in_with_rng, ColorRange};
+///
+/// let mut rng = StdRng::seed_from_u64(7);
+/// let range = ColorRange::new(100, 200, 100, 200, 33, 200, 0.2, 0.8).unwrap();
+/// let color = random_color_in_with_rng(range, &mut rng).unwrap();
+///
+/// assert!((100..=200).contains(&color.red));
+/// assert!((0.2..=0.8).contains(&color.alpha));
+/// ```
+pub fn random_color_in_with_rng<R: Rng + ?Sized>(
+    range: ColorRange,
+    rng: &mut R,
+) -> Result<RandomColor, ColorError> {
     validate_range(&range)?;
 
-    let mut rng = rand::thread_rng();
     Ok(RandomColor {
         red: rng.gen_range(range.red),
         green: rng.gen_range(range.green),
         blue: rng.gen_range(range.blue),
         alpha: rng.gen_range(range.alpha.0..=range.alpha.1),
     })
-}
-
-impl RandomColor {
-    /// Generates a random color struct from explicit bounds.
-    #[deprecated(note = "Use random_color_in(ColorRange::new(...)? ) instead")]
-    #[allow(clippy::too_many_arguments)]
-    pub fn rand_color_struct(
-        min_red: u8,
-        max_red: u8,
-        min_green: u8,
-        max_green: u8,
-        min_blue: u8,
-        max_blue: u8,
-        min_alpha: f32,
-        max_alpha: f32,
-    ) -> Self {
-        let range = ColorRange::new(
-            min_red, max_red, min_green, max_green, min_blue, max_blue, min_alpha, max_alpha,
-        )
-        .expect("invalid color range");
-
-        random_color_in(range).expect("color generation failed")
-    }
-
-    /// Generates a random `rgba(...)` string from explicit bounds.
-    #[deprecated(note = "Use random_color_in(ColorRange::new(...)? )?.to_rgba_string() instead")]
-    #[allow(clippy::too_many_arguments)]
-    pub fn rand_color_string(
-        min_red: u8,
-        max_red: u8,
-        min_green: u8,
-        max_green: u8,
-        min_blue: u8,
-        max_blue: u8,
-        min_alpha: f32,
-        max_alpha: f32,
-    ) -> String {
-        let range = ColorRange::new(
-            min_red, max_red, min_green, max_green, min_blue, max_blue, min_alpha, max_alpha,
-        )
-        .expect("invalid color range");
-
-        let color = random_color_in(range).expect("color generation failed");
-        color.to_rgba_string()
-    }
 }
 
 fn validate_range(range: &ColorRange) -> Result<(), ColorError> {

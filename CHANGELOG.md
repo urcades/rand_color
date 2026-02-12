@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-02-12
+
+### Added
+- Deterministic seeded RNG APIs:
+  - `random_color_with_rng(&mut R) -> RandomColor`
+  - `random_color_in_with_rng(ColorRange, &mut R) -> Result<RandomColor, ColorError>`
+- `Display` implementation for `RandomColor`.
+- Optional `serde` feature for serializing/deserializing public types.
+- GitHub Actions CI workflow running `fmt`, `clippy`, `test`, and `doc`.
+
+### Changed
+- Package version bumped to `0.2.0` for API cleanup.
+- Documentation updated with seeded usage and new API examples.
+
+### Removed
+- Removed deprecated legacy methods:
+  - `RandomColor::rand_color_struct(...)`
+  - `RandomColor::rand_color_string(...)`
+
 ## [0.1.1] - 2026-02-12
 
 ### Added

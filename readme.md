@@ -1,6 +1,6 @@
 # rand_rgb
 
-Generate random `rgba(...)` colors as either structured values or formatted strings.
+Generate random `rgba(...)` colors as structured values or formatted strings.
 
 ## About
 
@@ -12,14 +12,22 @@ Inspired by "[random-rgb-color](https://github.com/mrmrs/random-rgb-color/tree/m
 cargo add rand_rgb
 ```
 
+Optional serde support:
+
+```bash
+cargo add rand_rgb --features serde
+```
+
 ## Quick start
 
 ```rust
 use rand_rgb::random_color;
 
 let color = random_color();
-let css = color.to_rgba_string();
+assert!((0.0..=1.0).contains(&color.alpha));
 
+// Display and to_rgba_string produce the same CSS-style format.
+let css = color.to_string();
 assert!(css.starts_with("rgba("));
 ```
 
@@ -35,18 +43,36 @@ assert!((100..=200).contains(&color.red));
 assert!((0.2..=0.8).contains(&color.alpha));
 ```
 
+## Seeded deterministic generation
+
+```rust
+use rand::rngs::StdRng;
+use rand::SeedableRng;
+use rand_rgb::random_color_with_rng;
+
+let mut rng_a = StdRng::seed_from_u64(42);
+let mut rng_b = StdRng::seed_from_u64(42);
+
+assert_eq!(
+    random_color_with_rng(&mut rng_a),
+    random_color_with_rng(&mut rng_b)
+);
+```
+
 ## API overview
 
-- `random_color() -> RandomColor`: generates a color using defaults (`0..=255` for channels, `0.0..=1.0` for alpha).
-- `random_color_in(ColorRange) -> Result<RandomColor, ColorError>`: generates a color with custom bounds and validation.
-- `RandomColor::to_rgba_string() -> String`: formats with two decimal places in alpha.
+- `random_color() -> RandomColor`
+- `random_color_with_rng(&mut R) -> RandomColor`
+- `random_color_in(ColorRange) -> Result<RandomColor, ColorError>`
+- `random_color_in_with_rng(ColorRange, &mut R) -> Result<RandomColor, ColorError>`
+- `RandomColor::to_rgba_string() -> String`
+- `Display` for `RandomColor` (`format!("{}", color)`)
 
-## Compatibility note
+## Breaking change in 0.2.0
 
-`RandomColor::rand_color_struct(...)` and `RandomColor::rand_color_string(...)` still exist for compatibility but are deprecated in favor of the newer API.
+Deprecated legacy methods were removed:
 
-## Next steps
+- `RandomColor::rand_color_struct(...)`
+- `RandomColor::rand_color_string(...)`
 
-- [ ] Add seeded RNG helpers for deterministic output in tests and demos.
-- [ ] Consider implementing `Display` for `RandomColor`.
-- [ ] Add benches if performance tuning becomes a goal.
+Use `random_color_in(...)` plus `to_rgba_string()` instead.
