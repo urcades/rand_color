@@ -1,16 +1,16 @@
 [package]
-name = "rand_rgb"
-version = "0.2.2"
+name = "rand_hwb"
+version = "0.1.0"
 authors.workspace = true
 edition.workspace = true
 license.workspace = true
 repository.workspace = true
 homepage.workspace = true
 rust-version = "1.74"
-documentation = "https://docs.rs/rand_rgb"
+documentation = "https://docs.rs/rand_hwb"
 readme = "README.md"
-description = "Generate a random rgba-formatted color."
-keywords = ["color", "rgb"]
+description = "Generate random HWB colors with configurable ranges."
+keywords = ["color", "hwb"]
 categories = ["graphics", "development-tools"]
 
 [package.metadata.docs.rs]

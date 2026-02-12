@@ -8,14 +8,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Cargo workspace structure with new crates:
-  - `rand_color` (umbrella crate)
-  - `rand_hsl` (HSL-focused crate)
-- Workspace-level CI checks for format, clippy, test, and docs.
+- Release automation:
+  - `scripts/release.sh` with dependency-safe publish order.
+  - `Makefile` targets for dry-run and publish.
+- Workspace policy metadata:
+  - `rust-version = "1.74"` in each crate.
+  - docs.rs metadata (`all-features`, `--cfg docsrs`) in each crate.
+- New space crates:
+  - `rand_hsv`
+  - `rand_hwb`
+  - `rand_oklab`
+  - `rand_oklch`
+  - `rand_lab`
+  - `rand_lch`
+- New conversion strategy crate:
+  - `rand_color_convert` with RGB <-> HSL conversion helpers and `ToRgb`/`ToHsl` traits.
+- Property-based tests (`proptest`) for range invariants and deterministic seeded generation in workspace crates.
 
 ### Changed
-- Existing `rand_rgb` crate moved under `crates/rand_rgb` and prepared as a compatibility-focused crate for the workspace era.
-- Repository README now documents workspace crate map and recommended usage.
+- `rand_color` expanded to re-export all space crates plus `convert` module.
+- Workspace root documentation updated with crate map and automation workflow.
+- Version bumps for next releases:
+  - `rand_rgb` -> `0.2.2`
+  - `rand_hsl` -> `0.1.1`
+  - `rand_color` -> `0.2.0`
 
 ## [0.2.0] - 2026-02-12
 

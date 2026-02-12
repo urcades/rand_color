@@ -2,6 +2,7 @@ use crate::{
     random_hsl, random_hsl_in, random_hsl_in_with_rng, random_hsl_with_rng, HslColor, HslError,
     HslRange,
 };
+use proptest::prelude::*;
 use rand::rngs::StdRng;
 use rand::SeedableRng;
 
@@ -83,4 +84,44 @@ fn hsla_string_is_formatted_with_precision() {
         alpha: 0.3333,
     };
     assert_eq!(color.to_hsla_string(), "hsla(123.5, 45.7%, 89.1%, 0.33)");
+}
+
+proptest! {
+    #[test]
+    fn prop_hsl_in_range(
+        seed in any::<u64>(),
+        a_h in 0.0f32..360.0f32,
+        b_h in 0.0f32..360.0f32,
+        a_s in 0.0f32..100.0f32,
+        b_s in 0.0f32..100.0f32,
+        a_l in 0.0f32..100.0f32,
+        b_l in 0.0f32..100.0f32,
+        a_a in 0.0f32..1.0f32,
+        b_a in 0.0f32..1.0f32,
+    ) {
+        let min_h = a_h.min(b_h);
+        let max_h = a_h.max(b_h);
+        let min_s = a_s.min(b_s);
+        let max_s = a_s.max(b_s);
+        let min_l = a_l.min(b_l);
+        let max_l = a_l.max(b_l);
+        let min_a = a_a.min(b_a);
+        let max_a = a_a.max(b_a);
+
+        let range = HslRange::new(min_h, max_h, min_s, max_s, min_l, max_l, min_a, max_a).unwrap();
+        let mut rng = StdRng::seed_from_u64(seed);
+        let color = random_hsl_in_with_rng(range.clone(), &mut rng).unwrap();
+
+        prop_assert!((range.hue.0..=range.hue.1).contains(&color.hue));
+        prop_assert!((range.saturation.0..=range.saturation.1).contains(&color.saturation));
+        prop_assert!((range.lightness.0..=range.lightness.1).contains(&color.lightness));
+        prop_assert!((range.alpha.0..=range.alpha.1).contains(&color.alpha));
+    }
+
+    #[test]
+    fn prop_seeded_hsl_is_deterministic(seed in any::<u64>()) {
+        let mut a = StdRng::seed_from_u64(seed);
+        let mut b = StdRng::seed_from_u64(seed);
+        prop_assert_eq!(random_hsl_with_rng(&mut a), random_hsl_with_rng(&mut b));
+    }
 }

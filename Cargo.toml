@@ -1,5 +1,16 @@
 [workspace]
-members = ["crates/rand_rgb", "crates/rand_hsl", "crates/rand_color"]
+members = [
+    "crates/rand_rgb",
+    "crates/rand_hsl",
+    "crates/rand_hsv",
+    "crates/rand_hwb",
+    "crates/rand_oklab",
+    "crates/rand_oklch",
+    "crates/rand_lab",
+    "crates/rand_lch",
+    "crates/rand_color_convert",
+    "crates/rand_color",
+]
 resolver = "2"
 
 [workspace.package]
@@ -12,3 +23,4 @@ homepage = "https://github.com/urcades/rand_rgb"
 [workspace.dependencies]
 rand = "0.8.5"
 serde = { version = "1.0", features = ["derive"] }
+proptest = "1.6"
