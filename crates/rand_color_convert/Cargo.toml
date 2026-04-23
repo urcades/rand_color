@@ -1,6 +1,6 @@
 [package]
 name = "rand_color_convert"
-version = "0.1.0"
+version = "0.1.1"
 authors.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -21,8 +21,8 @@ rustdoc-args = ["--cfg", "docsrs"]
 default = []
 
 [dependencies]
-rand_rgb = { path = "../rand_rgb", version = "0.2.2", default-features = false }
-rand_hsl = { path = "../rand_hsl", version = "0.1.1", default-features = false }
+rand_rgb = { path = "../rand_rgb", version = "0.2.3", default-features = false }
+rand_hsl = { path = "../rand_hsl", version = "0.1.2", default-features = false }
 
 [dev-dependencies]
 proptest.workspace = true

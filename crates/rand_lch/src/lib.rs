@@ -1,3 +1,22 @@
+//! Generate random CIELCH color values with configurable component bounds.
+//!
+//! The crate samples each component independently from the configured numeric
+//! ranges. It does not attempt palette design, gamut mapping, contrast
+//! checking, or perceptual-uniform sampling.
+//!
+//! # Examples
+//!
+//! ```rust
+//! use rand_lch::random_lch;
+//!
+//! let color = random_lch();
+//!
+//! assert!((0.0..=360.0).contains(&color.hue));
+//! assert!(color.to_lch_string().starts_with("lch("));
+//! ```
+
+#![warn(missing_docs)]
+
 #[cfg(test)]
 mod tests;
 
@@ -7,14 +26,20 @@ use std::fmt;
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Copy, Debug, PartialEq)]
+/// Represents a randomly generated CIELCH `lch()` color value.
 pub struct LchColor {
+    /// CIELCH lightness component in `0.0..=100.0`.
     pub lightness: f32,
+    /// CIELCH chroma component in `0.0..=150.0`.
     pub chroma: f32,
+    /// CIELCH hue angle in degrees, normally in `0.0..=360.0`.
     pub hue: f32,
+    /// Alpha channel in `0.0..=1.0`.
     pub alpha: f32,
 }
 
 impl LchColor {
+    /// Formats the color as an `lch(l, c, h, alpha)` string.
     pub fn to_lch_string(&self) -> String {
         self.to_string()
     }
@@ -32,10 +57,15 @@ impl fmt::Display for LchColor {
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, PartialEq)]
+/// User-provided CIELCH component bounds for random generation.
 pub struct LchRange {
+    /// Inclusive lightness generation range.
     pub lightness: (f32, f32),
+    /// Inclusive chroma generation range.
     pub chroma: (f32, f32),
+    /// Inclusive hue generation range in degrees.
     pub hue: (f32, f32),
+    /// Inclusive alpha generation range.
     pub alpha: (f32, f32),
 }
 
@@ -51,6 +81,11 @@ impl Default for LchRange {
 }
 
 impl LchRange {
+    /// Builds a new set of bounds.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when any range is invalid.
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         min_lightness: f32,
@@ -75,12 +110,19 @@ impl LchRange {
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+/// Error returned when CIELCH bounds are invalid.
 pub enum LchError {
+    /// The minimum lightness bound is greater than the maximum lightness bound.
     InvalidLightnessRange,
+    /// The minimum chroma bound is greater than the maximum chroma bound.
     InvalidChromaRange,
+    /// The minimum hue bound is greater than the maximum hue bound.
     InvalidHueRange,
+    /// The minimum alpha bound is greater than the maximum alpha bound.
     InvalidAlphaRange,
+    /// A component bound is outside the supported range.
     ComponentOutOfBounds,
+    /// A component bound is infinite or NaN.
     NonFiniteValue,
 }
 
@@ -102,20 +144,34 @@ impl fmt::Display for LchError {
 
 impl Error for LchError {}
 
+/// Generates a random CIELCH color using default bounds.
 pub fn random_lch() -> LchColor {
     let mut rng = rand::thread_rng();
     random_lch_with_rng(&mut rng)
 }
 
+/// Generates a random CIELCH color using default bounds and a caller-provided RNG.
+///
+/// This is useful for deterministic tests.
 pub fn random_lch_with_rng<R: Rng + ?Sized>(rng: &mut R) -> LchColor {
     random_lch_in_with_rng(LchRange::default(), rng).expect("default lch range should be valid")
 }
 
+/// Generates a random CIELCH color using custom bounds.
+///
+/// # Errors
+///
+/// Returns a [`LchError`] when provided bounds are invalid.
 pub fn random_lch_in(range: LchRange) -> Result<LchColor, LchError> {
     let mut rng = rand::thread_rng();
     random_lch_in_with_rng(range, &mut rng)
 }
 
+/// Generates a random CIELCH color using custom bounds and a caller-provided RNG.
+///
+/// # Errors
+///
+/// Returns a [`LchError`] when provided bounds are invalid.
 pub fn random_lch_in_with_rng<R: Rng + ?Sized>(
     range: LchRange,
     rng: &mut R,

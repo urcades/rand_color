@@ -6,7 +6,7 @@ This workspace publishes crates in dependency order.
 
 1. Working tree is clean.
 2. CI is green.
-3. `cargo fmt`, `cargo clippy`, `cargo test`, and `cargo doc` pass locally.
+3. `cargo fmt`, `cargo clippy`, `cargo test`, and `RUSTDOCFLAGS="-D warnings" cargo doc` pass locally.
 4. `CARGO_REGISTRY_TOKEN` is set for crates.io.
 
 ## Quick commands
@@ -22,6 +22,9 @@ Publish:
 ```bash
 make release-publish
 ```
+
+`release-publish` refuses to publish from a dirty working tree. `release-dry-run`
+can be used during development before committing release-prep changes.
 
 ## Manual publish order
 

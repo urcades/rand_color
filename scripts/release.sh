@@ -14,10 +14,16 @@ CRATES=(
   rand_oklch
   rand_lab
   rand_lch
-  rand_color_convert
   rand_rgb
+  rand_color_convert
   rand_color
 )
+
+if [[ "$DRY_RUN" != "true" && -n "$(git status --short)" ]]; then
+  echo "error: working tree must be clean before publishing" >&2
+  git status --short >&2
+  exit 1
+fi
 
 for crate in "${CRATES[@]}"; do
   if [[ "$DRY_RUN" == "true" ]]; then
@@ -25,6 +31,6 @@ for crate in "${CRATES[@]}"; do
     cargo check -p "${crate}" --all-features
   else
     echo ">>> cargo publish -p ${crate}"
-    cargo publish -p "${crate}" --allow-dirty
+    cargo publish -p "${crate}"
   fi
 done

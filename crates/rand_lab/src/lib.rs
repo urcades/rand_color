@@ -1,3 +1,22 @@
+//! Generate random CIELAB color values with configurable component bounds.
+//!
+//! The crate samples each component independently from the configured numeric
+//! ranges. It does not attempt palette design, gamut mapping, contrast
+//! checking, or perceptual-uniform sampling.
+//!
+//! # Examples
+//!
+//! ```rust
+//! use rand_lab::random_lab;
+//!
+//! let color = random_lab();
+//!
+//! assert!((0.0..=100.0).contains(&color.lightness));
+//! assert!(color.to_lab_string().starts_with("lab("));
+//! ```
+
+#![warn(missing_docs)]
+
 #[cfg(test)]
 mod tests;
 
@@ -7,14 +26,20 @@ use std::fmt;
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Copy, Debug, PartialEq)]
+/// Represents a randomly generated CIELAB `lab()` color value.
 pub struct LabColor {
+    /// CIELAB lightness component in `0.0..=100.0`.
     pub lightness: f32,
+    /// CIELAB `a` opponent-axis component in `-128.0..=127.0`.
     pub a: f32,
+    /// CIELAB `b` opponent-axis component in `-128.0..=127.0`.
     pub b: f32,
+    /// Alpha channel in `0.0..=1.0`.
     pub alpha: f32,
 }
 
 impl LabColor {
+    /// Formats the color as a `lab(l, a, b, alpha)` string.
     pub fn to_lab_string(&self) -> String {
         self.to_string()
     }
@@ -32,10 +57,15 @@ impl fmt::Display for LabColor {
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, PartialEq)]
+/// User-provided CIELAB component bounds for random generation.
 pub struct LabRange {
+    /// Inclusive lightness generation range.
     pub lightness: (f32, f32),
+    /// Inclusive `a` component generation range.
     pub a: (f32, f32),
+    /// Inclusive `b` component generation range.
     pub b: (f32, f32),
+    /// Inclusive alpha generation range.
     pub alpha: (f32, f32),
 }
 
@@ -51,6 +81,11 @@ impl Default for LabRange {
 }
 
 impl LabRange {
+    /// Builds a new set of bounds.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when any range is invalid.
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         min_lightness: f32,
@@ -75,12 +110,19 @@ impl LabRange {
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+/// Error returned when CIELAB bounds are invalid.
 pub enum LabError {
+    /// The minimum lightness bound is greater than the maximum lightness bound.
     InvalidLightnessRange,
+    /// The minimum `a` bound is greater than the maximum `a` bound.
     InvalidARange,
+    /// The minimum `b` bound is greater than the maximum `b` bound.
     InvalidBRange,
+    /// The minimum alpha bound is greater than the maximum alpha bound.
     InvalidAlphaRange,
+    /// A component bound is outside the supported range.
     ComponentOutOfBounds,
+    /// A component bound is infinite or NaN.
     NonFiniteValue,
 }
 
@@ -100,20 +142,34 @@ impl fmt::Display for LabError {
 
 impl Error for LabError {}
 
+/// Generates a random CIELAB color using default bounds.
 pub fn random_lab() -> LabColor {
     let mut rng = rand::thread_rng();
     random_lab_with_rng(&mut rng)
 }
 
+/// Generates a random CIELAB color using default bounds and a caller-provided RNG.
+///
+/// This is useful for deterministic tests.
 pub fn random_lab_with_rng<R: Rng + ?Sized>(rng: &mut R) -> LabColor {
     random_lab_in_with_rng(LabRange::default(), rng).expect("default lab range should be valid")
 }
 
+/// Generates a random CIELAB color using custom bounds.
+///
+/// # Errors
+///
+/// Returns a [`LabError`] when provided bounds are invalid.
 pub fn random_lab_in(range: LabRange) -> Result<LabColor, LabError> {
     let mut rng = rand::thread_rng();
     random_lab_in_with_rng(range, &mut rng)
 }
 
+/// Generates a random CIELAB color using custom bounds and a caller-provided RNG.
+///
+/// # Errors
+///
+/// Returns a [`LabError`] when provided bounds are invalid.
 pub fn random_lab_in_with_rng<R: Rng + ?Sized>(
     range: LabRange,
     rng: &mut R,

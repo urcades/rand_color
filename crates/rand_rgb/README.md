@@ -59,3 +59,8 @@ assert_eq!(
 `rand_rgb` is maintained for RGB-focused users and compatibility.
 
 If you plan to use multiple spaces, prefer `rand_color::rgb` from the `rand_color` umbrella crate.
+
+## Caveats
+
+- Values are sampled from numeric channel ranges; they are not palette-aware or contrast-checked.
+- `to_rgba_string()` returns stable crate formatting with two decimal places for alpha.

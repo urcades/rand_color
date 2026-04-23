@@ -1,3 +1,22 @@
+//! Generate random RGB/RGBA color values with configurable channel bounds.
+//!
+//! The crate samples each channel independently from the configured numeric
+//! ranges. It does not attempt palette design, gamut mapping, contrast
+//! checking, or perceptual-uniform sampling.
+//!
+//! # Examples
+//!
+//! ```rust
+//! use rand_rgb::random_color;
+//!
+//! let color = random_color();
+//!
+//! assert!((0.0..=1.0).contains(&color.alpha));
+//! assert!(color.to_rgba_string().starts_with("rgba("));
+//! ```
+
+#![warn(missing_docs)]
+
 #[cfg(test)]
 mod tests;
 
@@ -10,9 +29,13 @@ use std::ops::RangeInclusive;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct RandomColor {
+    /// Red channel in the inclusive range `0..=255`.
     pub red: u8,
+    /// Green channel in the inclusive range `0..=255`.
     pub green: u8,
+    /// Blue channel in the inclusive range `0..=255`.
     pub blue: u8,
+    /// Alpha channel in the inclusive range `0.0..=1.0`.
     pub alpha: f32,
 }
 
@@ -54,9 +77,13 @@ impl fmt::Display for RandomColor {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct ColorRange {
+    /// Inclusive red-channel generation range.
     pub red: RangeInclusive<u8>,
+    /// Inclusive green-channel generation range.
     pub green: RangeInclusive<u8>,
+    /// Inclusive blue-channel generation range.
     pub blue: RangeInclusive<u8>,
+    /// Inclusive alpha-channel generation range.
     pub alpha: (f32, f32),
 }
 
@@ -112,8 +139,11 @@ impl ColorRange {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ColorError {
+    /// A minimum RGB channel bound is greater than its maximum.
     InvalidChannelRange,
+    /// The minimum alpha bound is greater than the maximum alpha bound.
     InvalidAlphaRange,
+    /// An alpha bound is non-finite or outside `0.0..=1.0`.
     AlphaOutOfBounds,
 }
 

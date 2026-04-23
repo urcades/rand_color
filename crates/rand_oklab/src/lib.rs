@@ -1,3 +1,22 @@
+//! Generate random Oklab color values with configurable component bounds.
+//!
+//! The crate samples each component independently from the configured numeric
+//! ranges. It does not attempt palette design, gamut mapping, contrast
+//! checking, or perceptual-uniform sampling.
+//!
+//! # Examples
+//!
+//! ```rust
+//! use rand_oklab::random_oklab;
+//!
+//! let color = random_oklab();
+//!
+//! assert!((0.0..=1.0).contains(&color.lightness));
+//! assert!(color.to_oklab_string().starts_with("oklab("));
+//! ```
+
+#![warn(missing_docs)]
+
 #[cfg(test)]
 mod tests;
 
@@ -7,14 +26,20 @@ use std::fmt;
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Copy, Debug, PartialEq)]
+/// Represents a randomly generated `oklab()` color value.
 pub struct OklabColor {
+    /// Oklab lightness component in `0.0..=1.0`.
     pub lightness: f32,
+    /// Oklab `a` opponent-axis component in `-0.4..=0.4`.
     pub a: f32,
+    /// Oklab `b` opponent-axis component in `-0.4..=0.4`.
     pub b: f32,
+    /// Alpha channel in `0.0..=1.0`.
     pub alpha: f32,
 }
 
 impl OklabColor {
+    /// Formats the color as an `oklab(l, a, b, alpha)` string.
     pub fn to_oklab_string(&self) -> String {
         self.to_string()
     }
@@ -32,10 +57,15 @@ impl fmt::Display for OklabColor {
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, PartialEq)]
+/// User-provided Oklab component bounds for random generation.
 pub struct OklabRange {
+    /// Inclusive lightness generation range.
     pub lightness: (f32, f32),
+    /// Inclusive `a` component generation range.
     pub a: (f32, f32),
+    /// Inclusive `b` component generation range.
     pub b: (f32, f32),
+    /// Inclusive alpha generation range.
     pub alpha: (f32, f32),
 }
 
@@ -51,6 +81,11 @@ impl Default for OklabRange {
 }
 
 impl OklabRange {
+    /// Builds a new set of bounds.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when any range is invalid.
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         min_lightness: f32,
@@ -75,12 +110,19 @@ impl OklabRange {
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+/// Error returned when Oklab bounds are invalid.
 pub enum OklabError {
+    /// The minimum lightness bound is greater than the maximum lightness bound.
     InvalidLightnessRange,
+    /// The minimum `a` bound is greater than the maximum `a` bound.
     InvalidARange,
+    /// The minimum `b` bound is greater than the maximum `b` bound.
     InvalidBRange,
+    /// The minimum alpha bound is greater than the maximum alpha bound.
     InvalidAlphaRange,
+    /// A component bound is outside the supported range.
     ComponentOutOfBounds,
+    /// A component bound is infinite or NaN.
     NonFiniteValue,
 }
 
@@ -100,21 +142,35 @@ impl fmt::Display for OklabError {
 
 impl Error for OklabError {}
 
+/// Generates a random Oklab color using default bounds.
 pub fn random_oklab() -> OklabColor {
     let mut rng = rand::thread_rng();
     random_oklab_with_rng(&mut rng)
 }
 
+/// Generates a random Oklab color using default bounds and a caller-provided RNG.
+///
+/// This is useful for deterministic tests.
 pub fn random_oklab_with_rng<R: Rng + ?Sized>(rng: &mut R) -> OklabColor {
     random_oklab_in_with_rng(OklabRange::default(), rng)
         .expect("default oklab range should be valid")
 }
 
+/// Generates a random Oklab color using custom bounds.
+///
+/// # Errors
+///
+/// Returns an [`OklabError`] when provided bounds are invalid.
 pub fn random_oklab_in(range: OklabRange) -> Result<OklabColor, OklabError> {
     let mut rng = rand::thread_rng();
     random_oklab_in_with_rng(range, &mut rng)
 }
 
+/// Generates a random Oklab color using custom bounds and a caller-provided RNG.
+///
+/// # Errors
+///
+/// Returns an [`OklabError`] when provided bounds are invalid.
 pub fn random_oklab_in_with_rng<R: Rng + ?Sized>(
     range: OklabRange,
     rng: &mut R,

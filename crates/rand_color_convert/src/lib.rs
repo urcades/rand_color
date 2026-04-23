@@ -1,14 +1,46 @@
+//! Conversion helpers for the `rand_color` workspace.
+//!
+//! This crate currently supports RGB <-> HSL conversion only. Other color
+//! spaces in the workspace intentionally remain random-generation crates, not
+//! full conversion engines.
+//!
+//! # Examples
+//!
+//! ```rust
+//! use rand_color_convert::{rgb_to_hsl, ToRgb};
+//! use rand_rgb::RandomColor;
+//!
+//! let rgb = RandomColor {
+//!     red: 255,
+//!     green: 0,
+//!     blue: 0,
+//!     alpha: 1.0,
+//! };
+//!
+//! let hsl = rgb_to_hsl(rgb);
+//! let round_trip = hsl.to_rgb();
+//!
+//! assert_eq!(round_trip.red, 255);
+//! assert_eq!(round_trip.alpha, 1.0);
+//! ```
+
+#![warn(missing_docs)]
+
 #[cfg(test)]
 mod tests;
 
 use rand_hsl::HslColor;
 use rand_rgb::RandomColor;
 
+/// Converts a color value into an RGB/RGBA representation.
 pub trait ToRgb {
+    /// Converts `self` to [`RandomColor`].
     fn to_rgb(&self) -> RandomColor;
 }
 
+/// Converts a color value into an HSL/HSLA representation.
 pub trait ToHsl {
+    /// Converts `self` to [`HslColor`].
     fn to_hsl(&self) -> HslColor;
 }
 
@@ -24,6 +56,9 @@ impl ToRgb for HslColor {
     }
 }
 
+/// Converts an RGB/RGBA color to HSL/HSLA.
+///
+/// The alpha component is copied through unchanged.
 pub fn rgb_to_hsl(color: RandomColor) -> HslColor {
     let r = color.red as f32 / 255.0;
     let g = color.green as f32 / 255.0;
@@ -62,6 +97,10 @@ pub fn rgb_to_hsl(color: RandomColor) -> HslColor {
     }
 }
 
+/// Converts an HSL/HSLA color to RGB/RGBA.
+///
+/// Hue wraps with Euclidean modulo. Saturation and lightness are clamped to
+/// `0.0..=100.0`; alpha is copied through unchanged.
 pub fn hsl_to_rgb(color: HslColor) -> RandomColor {
     let hue = color.hue.rem_euclid(360.0);
     let saturation = (color.saturation / 100.0).clamp(0.0, 1.0);

@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [Workspace patch releases] - 2026-04-23
+
+### Changed
+- Patch releases prepared for all workspace crates:
+  - `rand_rgb` -> `0.2.3`
+  - `rand_hsl` -> `0.1.2`
+  - `rand_hsv`, `rand_hwb`, `rand_oklab`, `rand_oklch`, `rand_lab`, `rand_lch`, and `rand_color_convert` -> `0.1.1`
+  - `rand_color` -> `0.2.1`
+- Public rustdoc coverage expanded across all crates, including newer color-space crates and re-export modules.
+- Root and per-crate READMEs now use a consistent install, quick start, custom range, seeded RNG, serde, and caveat structure.
+- Documentation builds now run with `RUSTDOCFLAGS="-D warnings"` in local checks and CI.
+
+### Fixed
+- Release automation now publishes `rand_rgb` before `rand_color_convert`, matching dependency order.
+- Publish automation no longer uses `--allow-dirty` and requires a clean working tree for actual publishing.
+
+## [Workspace expansion] - 2026-02-11
+
 ### Added
 - Release automation:
   - `scripts/release.sh` with dependency-safe publish order.

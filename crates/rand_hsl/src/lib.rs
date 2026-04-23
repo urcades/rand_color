@@ -1,3 +1,22 @@
+//! Generate random HSL/HSLA color values with configurable channel bounds.
+//!
+//! The crate samples each component independently from the configured numeric
+//! ranges. It does not attempt palette design, gamut mapping, contrast
+//! checking, or perceptual-uniform sampling.
+//!
+//! # Examples
+//!
+//! ```rust
+//! use rand_hsl::random_hsl;
+//!
+//! let color = random_hsl();
+//!
+//! assert!((0.0..=360.0).contains(&color.hue));
+//! assert!(color.to_hsla_string().starts_with("hsla("));
+//! ```
+
+#![warn(missing_docs)]
+
 #[cfg(test)]
 mod tests;
 
@@ -9,9 +28,13 @@ use std::fmt;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct HslColor {
+    /// Hue angle in degrees, normally in `0.0..=360.0`.
     pub hue: f32,
+    /// Saturation percentage in `0.0..=100.0`.
     pub saturation: f32,
+    /// Lightness percentage in `0.0..=100.0`.
     pub lightness: f32,
+    /// Alpha channel in `0.0..=1.0`.
     pub alpha: f32,
 }
 
@@ -51,9 +74,13 @@ impl fmt::Display for HslColor {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct HslRange {
+    /// Inclusive hue generation range in degrees.
     pub hue: (f32, f32),
+    /// Inclusive saturation generation range in percent.
     pub saturation: (f32, f32),
+    /// Inclusive lightness generation range in percent.
     pub lightness: (f32, f32),
+    /// Inclusive alpha generation range.
     pub alpha: (f32, f32),
 }
 
@@ -100,11 +127,17 @@ impl HslRange {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum HslError {
+    /// The minimum hue bound is greater than the maximum hue bound.
     InvalidHueRange,
+    /// The minimum saturation bound is greater than the maximum saturation bound.
     InvalidSaturationRange,
+    /// The minimum lightness bound is greater than the maximum lightness bound.
     InvalidLightnessRange,
+    /// The minimum alpha bound is greater than the maximum alpha bound.
     InvalidAlphaRange,
+    /// A component bound is outside the supported range.
     ComponentOutOfBounds,
+    /// A component bound is infinite or NaN.
     NonFiniteValue,
 }
 

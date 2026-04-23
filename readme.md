@@ -21,6 +21,18 @@ This repository is a Cargo workspace for random color generation across multiple
 - Use `rand_color` for a unified entrypoint across spaces.
 - Use `rand_color_convert` directly if you only need conversion helpers.
 
+## Install
+
+```bash
+cargo add rand_color
+```
+
+Optional serde support for all generated color structs:
+
+```bash
+cargo add rand_color --features serde
+```
+
 ## Maintenance mode
 
 This workspace is now feature-frozen and maintained in bugfix/security mode.
@@ -44,13 +56,42 @@ assert!(oklab.to_oklab_string().starts_with("oklab("));
 assert!((0.0..=360.0).contains(&converted.hue));
 ```
 
+## Custom ranges and seeded RNGs
+
+Every focused generation crate exposes:
+
+- a color value type, such as `rand_rgb::RandomColor`
+- a range type, such as `rand_rgb::ColorRange`
+- `random_*()` for thread-local randomness
+- `random_*_in(...)` for custom bounds
+- `random_*_with_rng(...)` and `random_*_in_with_rng(...)` for deterministic tests
+
+```rust
+use rand::rngs::StdRng;
+use rand::SeedableRng;
+use rand_color::rgb::{random_color_in_with_rng, ColorRange};
+
+let range = ColorRange::new(100, 200, 50, 150, 0, 80, 0.4, 1.0).unwrap();
+let mut rng = StdRng::seed_from_u64(42);
+let color = random_color_in_with_rng(range, &mut rng).unwrap();
+
+assert!((100..=200).contains(&color.red));
+assert!((0.4..=1.0).contains(&color.alpha));
+```
+
+## Caveats
+
+- Values are sampled from numeric component ranges; they are not gamut-checked, contrast-checked, palette-aware, or perceptually uniform.
+- `rand_color_convert` currently provides RGB <-> HSL conversion only.
+- String helpers are stable crate formatting. `rgba(...)`, `hsla(...)`, `oklab(...)`, `oklch(...)`, `lab(...)`, and `lch(...)` mirror common color notation; `hsva(...)` and `hwba(...)` are compatibility formats, not browser-CSS guarantees.
+
 ## Local quality checks
 
 ```bash
 cargo fmt --all -- --check
 cargo clippy --workspace --all-targets --all-features -- -D warnings
 cargo test --workspace --all-features
-cargo doc --workspace --all-features --no-deps
+RUSTDOCFLAGS="-D warnings" cargo doc --workspace --all-features --no-deps
 ```
 
 ## Release automation

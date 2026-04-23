@@ -1,3 +1,22 @@
+//! Generate random Oklch color values with configurable component bounds.
+//!
+//! The crate samples each component independently from the configured numeric
+//! ranges. It does not attempt palette design, gamut mapping, contrast
+//! checking, or perceptual-uniform sampling.
+//!
+//! # Examples
+//!
+//! ```rust
+//! use rand_oklch::random_oklch;
+//!
+//! let color = random_oklch();
+//!
+//! assert!((0.0..=360.0).contains(&color.hue));
+//! assert!(color.to_oklch_string().starts_with("oklch("));
+//! ```
+
+#![warn(missing_docs)]
+
 #[cfg(test)]
 mod tests;
 
@@ -7,14 +26,20 @@ use std::fmt;
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Copy, Debug, PartialEq)]
+/// Represents a randomly generated `oklch()` color value.
 pub struct OklchColor {
+    /// Oklch lightness component in `0.0..=1.0`.
     pub lightness: f32,
+    /// Oklch chroma component in `0.0..=0.4`.
     pub chroma: f32,
+    /// Oklch hue angle in degrees, normally in `0.0..=360.0`.
     pub hue: f32,
+    /// Alpha channel in `0.0..=1.0`.
     pub alpha: f32,
 }
 
 impl OklchColor {
+    /// Formats the color as an `oklch(l, c, h, alpha)` string.
     pub fn to_oklch_string(&self) -> String {
         self.to_string()
     }
@@ -32,10 +57,15 @@ impl fmt::Display for OklchColor {
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, PartialEq)]
+/// User-provided Oklch component bounds for random generation.
 pub struct OklchRange {
+    /// Inclusive lightness generation range.
     pub lightness: (f32, f32),
+    /// Inclusive chroma generation range.
     pub chroma: (f32, f32),
+    /// Inclusive hue generation range in degrees.
     pub hue: (f32, f32),
+    /// Inclusive alpha generation range.
     pub alpha: (f32, f32),
 }
 
@@ -51,6 +81,11 @@ impl Default for OklchRange {
 }
 
 impl OklchRange {
+    /// Builds a new set of bounds.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when any range is invalid.
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         min_lightness: f32,
@@ -75,12 +110,19 @@ impl OklchRange {
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+/// Error returned when Oklch bounds are invalid.
 pub enum OklchError {
+    /// The minimum lightness bound is greater than the maximum lightness bound.
     InvalidLightnessRange,
+    /// The minimum chroma bound is greater than the maximum chroma bound.
     InvalidChromaRange,
+    /// The minimum hue bound is greater than the maximum hue bound.
     InvalidHueRange,
+    /// The minimum alpha bound is greater than the maximum alpha bound.
     InvalidAlphaRange,
+    /// A component bound is outside the supported range.
     ComponentOutOfBounds,
+    /// A component bound is infinite or NaN.
     NonFiniteValue,
 }
 
@@ -102,21 +144,35 @@ impl fmt::Display for OklchError {
 
 impl Error for OklchError {}
 
+/// Generates a random Oklch color using default bounds.
 pub fn random_oklch() -> OklchColor {
     let mut rng = rand::thread_rng();
     random_oklch_with_rng(&mut rng)
 }
 
+/// Generates a random Oklch color using default bounds and a caller-provided RNG.
+///
+/// This is useful for deterministic tests.
 pub fn random_oklch_with_rng<R: Rng + ?Sized>(rng: &mut R) -> OklchColor {
     random_oklch_in_with_rng(OklchRange::default(), rng)
         .expect("default oklch range should be valid")
 }
 
+/// Generates a random Oklch color using custom bounds.
+///
+/// # Errors
+///
+/// Returns an [`OklchError`] when provided bounds are invalid.
 pub fn random_oklch_in(range: OklchRange) -> Result<OklchColor, OklchError> {
     let mut rng = rand::thread_rng();
     random_oklch_in_with_rng(range, &mut rng)
 }
 
+/// Generates a random Oklch color using custom bounds and a caller-provided RNG.
+///
+/// # Errors
+///
+/// Returns an [`OklchError`] when provided bounds are invalid.
 pub fn random_oklch_in_with_rng<R: Rng + ?Sized>(
     range: OklchRange,
     rng: &mut R,

@@ -1,6 +1,6 @@
 [package]
 name = "rand_color"
-version = "0.2.0"
+version = "0.2.1"
 authors.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -31,12 +31,12 @@ serde = [
 ]
 
 [dependencies]
-rand_rgb = { path = "../rand_rgb", version = "0.2.2", default-features = false }
-rand_hsl = { path = "../rand_hsl", version = "0.1.1", default-features = false }
-rand_hsv = { path = "../rand_hsv", version = "0.1.0", default-features = false }
-rand_hwb = { path = "../rand_hwb", version = "0.1.0", default-features = false }
-rand_oklab = { path = "../rand_oklab", version = "0.1.0", default-features = false }
-rand_oklch = { path = "../rand_oklch", version = "0.1.0", default-features = false }
-rand_lab = { path = "../rand_lab", version = "0.1.0", default-features = false }
-rand_lch = { path = "../rand_lch", version = "0.1.0", default-features = false }
-rand_color_convert = { path = "../rand_color_convert", version = "0.1.0", default-features = false }
+rand_rgb = { path = "../rand_rgb", version = "0.2.3", default-features = false }
+rand_hsl = { path = "../rand_hsl", version = "0.1.2", default-features = false }
+rand_hsv = { path = "../rand_hsv", version = "0.1.1", default-features = false }
+rand_hwb = { path = "../rand_hwb", version = "0.1.1", default-features = false }
+rand_oklab = { path = "../rand_oklab", version = "0.1.1", default-features = false }
+rand_oklch = { path = "../rand_oklch", version = "0.1.1", default-features = false }
+rand_lab = { path = "../rand_lab", version = "0.1.1", default-features = false }
+rand_lch = { path = "../rand_lch", version = "0.1.1", default-features = false }
+rand_color_convert = { path = "../rand_color_convert", version = "0.1.1", default-features = false }
