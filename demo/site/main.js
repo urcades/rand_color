@@ -42,13 +42,7 @@ function renderGeneratedColors() {
   elements.snippet.textContent = generated.snippet;
   elements.results.replaceChildren(
     ...generated.colors.map((color) =>
-      row([
-        swatch(color.css_preview),
-        text(color.space),
-        code(color.crate_output),
-        code(color.css_preview),
-        text(color.components),
-      ]),
+      row([swatch(color.css_preview), code(color.crate_output), text(color.components)]),
     ),
   );
 }
@@ -61,7 +55,7 @@ function renderAllSpaces() {
         swatch(color.css_preview),
         text(color.space),
         code(color.crate_output),
-        code(color.css_preview),
+        previewCss(color),
       ]),
     ),
   );
@@ -112,6 +106,14 @@ function code(value) {
   const element = document.createElement("code");
   element.textContent = value;
   return element;
+}
+
+function previewCss(color) {
+  if (color.css_preview === color.crate_output) {
+    return text("same as output");
+  }
+
+  return code(color.css_preview);
 }
 
 function text(value) {

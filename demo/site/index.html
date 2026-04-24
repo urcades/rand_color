@@ -49,9 +49,7 @@
           <thead>
             <tr>
               <th scope="col">Preview</th>
-              <th scope="col">Space</th>
               <th scope="col">Crate output</th>
-              <th scope="col">Preview CSS</th>
               <th scope="col">Components</th>
             </tr>
           </thead>
@@ -72,7 +70,7 @@
               <th scope="col">Preview</th>
               <th scope="col">Space</th>
               <th scope="col">Crate output</th>
-              <th scope="col">Preview CSS</th>
+              <th scope="col">Browser preview CSS</th>
             </tr>
           </thead>
           <tbody id="space-results"></tbody>
@@ -101,9 +99,10 @@
           <li>Generated values are numeric-range samples, not palette design.</li>
           <li>The conversion crate currently supports RGB &lt;-&gt; HSL only.</li>
           <li>
-            The crate output strings are shown separately from preview CSS.
-            <code>hsva(...)</code> and <code>hwba(...)</code> are compatibility
-            formats, not browser-CSS guarantees.
+            The cross-space table only shows browser preview CSS when it differs
+            from the crate output string. <code>hsva(...)</code> and
+            <code>hwba(...)</code> are compatibility formats, not browser-CSS
+            guarantees.
           </li>
         </ul>
       </section>
