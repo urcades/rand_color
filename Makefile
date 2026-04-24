@@ -1,4 +1,4 @@
-.PHONY: release-dry-run release-publish check
+.PHONY: release-dry-run release-publish check demo-build demo-serve
 
 check:
 	cargo fmt --all -- --check
@@ -11,3 +11,9 @@ release-dry-run:
 
 release-publish:
 	./scripts/release.sh
+
+demo-build:
+	./demo/build.sh
+
+demo-serve:
+	./demo/serve.sh

@@ -94,6 +94,22 @@ cargo test --workspace --all-features
 RUSTDOCFLAGS="-D warnings" cargo doc --workspace --all-features --no-deps
 ```
 
+## Static WASM demo
+
+This repository includes a small plain-HTML demo site under `demo/`. It uses a
+tiny `wasm-bindgen` crate to call the local `rand_color` workspace crates from a
+static web page.
+
+```bash
+make demo-build
+make demo-serve
+```
+
+Then open http://localhost:8787.
+
+GitHub Pages is configured to deploy from Actions. The Pages workflow builds the
+same demo and deploys `demo/site` when changes land on `master`.
+
 ## Release automation
 
 ```bash

@@ -3,3 +3,9 @@
 .DS_Store
 # proptest failures
 **/proptest-regressions/
+
+# local demo build outputs
+/demo/.tools/
+/demo/site/pkg/
+/demo/target/
+/demo/wasm/target/

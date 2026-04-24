@@ -1,0 +1,18 @@
+[package]
+name = "rand_color_demo_wasm"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+getrandom = { version = "0.2", features = ["js"] }
+rand = "0.8.5"
+rand_color = { path = "../../crates/rand_color" }
+serde = { version = "1.0", features = ["derive"] }
+serde-wasm-bindgen = "0.6.5"
+wasm-bindgen = "0.2.118"

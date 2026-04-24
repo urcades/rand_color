@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>rand_color demo</title>
+  </head>
+  <body>
+    <main>
+      <h1>rand_color demo</h1>
+      <p>
+        A small static page using WebAssembly to call the local Rust crates. The
+        styling is intentionally plain.
+      </p>
+
+      <section>
+        <h2>Generate colors</h2>
+        <fieldset>
+          <legend>Inputs</legend>
+          <label>
+            Space
+            <select id="space">
+              <option value="rgb">RGB</option>
+              <option value="hsl">HSL</option>
+              <option value="hsv">HSV</option>
+              <option value="hwb">HWB</option>
+              <option value="oklab">Oklab</option>
+              <option value="oklch">Oklch</option>
+              <option value="lab">Lab</option>
+              <option value="lch">Lch</option>
+            </select>
+          </label>
+          <label>
+            Seed
+            <input id="seed" type="number" value="42" min="0" step="1" />
+          </label>
+          <label>
+            Count
+            <input id="count" type="number" value="12" min="1" max="96" step="1" />
+          </label>
+          <button id="generate" type="button">Generate</button>
+        </fieldset>
+
+        <h3>Rust call</h3>
+        <pre id="snippet"></pre>
+
+        <h3>Results</h3>
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Preview</th>
+              <th scope="col">Space</th>
+              <th scope="col">Crate output</th>
+              <th scope="col">Preview CSS</th>
+              <th scope="col">Components</th>
+            </tr>
+          </thead>
+          <tbody id="results"></tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Same seed, different spaces</h2>
+        <p>
+          This uses the same seed as above, offset by row, and calls each
+          space-specific generator once.
+        </p>
+        <button id="all-spaces" type="button">Generate one from each space</button>
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Preview</th>
+              <th scope="col">Space</th>
+              <th scope="col">Crate output</th>
+              <th scope="col">Preview CSS</th>
+            </tr>
+          </thead>
+          <tbody id="space-results"></tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>RGB &lt;-&gt; HSL conversion</h2>
+        <fieldset>
+          <legend>RGB input</legend>
+          <label>Red <input id="red" type="number" value="128" min="0" max="255" /></label>
+          <label>Green <input id="green" type="number" value="64" min="0" max="255" /></label>
+          <label>Blue <input id="blue" type="number" value="192" min="0" max="255" /></label>
+          <label>Alpha <input id="alpha" type="number" value="1" min="0" max="1" step="0.01" /></label>
+          <button id="convert" type="button">Convert</button>
+        </fieldset>
+        <pre id="convert-snippet"></pre>
+        <table>
+          <tbody id="conversion"></tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Caveats</h2>
+        <ul>
+          <li>Generated values are numeric-range samples, not palette design.</li>
+          <li>The conversion crate currently supports RGB &lt;-&gt; HSL only.</li>
+          <li>
+            The crate output strings are shown separately from preview CSS.
+            <code>hsva(...)</code> and <code>hwba(...)</code> are compatibility
+            formats, not browser-CSS guarantees.
+          </li>
+        </ul>
+      </section>
+    </main>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
