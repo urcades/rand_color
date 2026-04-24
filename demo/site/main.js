@@ -1,12 +1,25 @@
 import init, {
   convert_rgb_to_hsl,
   generate_all_spaces,
+  generate_avatar,
   generate_colors,
 } from "./pkg/rand_color_demo_wasm.js";
+
+const avatarSampleKeys = [
+  "7f35a4db-9d18-4696-bf5a-fc4e835ef9bd",
+  "rand_color",
+  "wasm-demo",
+  "flower-computer",
+];
 
 const elements = {
   alpha: document.querySelector("#alpha"),
   allSpaces: document.querySelector("#all-spaces"),
+  avatarGenerate: document.querySelector("#avatar-generate"),
+  avatarKey: document.querySelector("#avatar-key"),
+  avatarOutput: document.querySelector("#avatar-output"),
+  avatarSamples: document.querySelector("#avatar-samples"),
+  avatarSnippet: document.querySelector("#avatar-snippet"),
   blue: document.querySelector("#blue"),
   conversion: document.querySelector("#conversion"),
   convert: document.querySelector("#convert"),
@@ -27,9 +40,12 @@ await init();
 elements.generate.addEventListener("click", renderGeneratedColors);
 elements.allSpaces.addEventListener("click", renderAllSpaces);
 elements.convert.addEventListener("click", renderConversion);
+elements.avatarGenerate.addEventListener("click", renderAvatar);
 
 renderGeneratedColors();
 renderAllSpaces();
+renderAvatar();
+renderAvatarSamples();
 renderConversion();
 
 function renderGeneratedColors() {
@@ -78,6 +94,102 @@ function renderConversion() {
   );
 }
 
+function renderAvatar() {
+  const avatar = generate_avatar(elements.avatarKey.value);
+
+  elements.avatarSnippet.textContent = avatar.snippet;
+  elements.avatarOutput.replaceChildren(
+    avatarSvg(avatar, 160, "avatar-main"),
+    avatarDetails(avatar),
+  );
+}
+
+function renderAvatarSamples() {
+  elements.avatarSamples.replaceChildren(
+    ...avatarSampleKeys.map((key, index) => {
+      const avatar = generate_avatar(key);
+
+      return row([
+        avatarSvg(avatar, 64, `avatar-sample-${index}`),
+        code(avatar.key),
+        code(avatar.seed),
+        avatarPalette(avatar),
+      ]);
+    }),
+  );
+}
+
+function avatarSvg(avatar, size, idPrefix) {
+  const clipId = `${idPrefix}-${avatar.seed}`;
+  const svg = svgElement("svg", {
+    "aria-label": `Avatar for ${avatar.key}`,
+    height: size,
+    role: "img",
+    viewBox: "0 0 100 100",
+    width: size,
+  });
+  const defs = svgElement("defs");
+  const clipPath = svgElement("clipPath", { id: clipId });
+  clipPath.append(svgElement("circle", { cx: 50, cy: 50, r: 50 }));
+  defs.append(clipPath);
+
+  const clipped = svgElement("g", { "clip-path": `url(#${clipId})` });
+  clipped.append(svgElement("rect", { fill: avatar.background, height: 100, width: 100 }));
+
+  for (const cell of avatar.cells) {
+    clipped.append(
+      svgElement("rect", {
+        fill: avatar[cell.fill],
+        height: 18,
+        width: 18,
+        x: cell.x * 20 + 1,
+        y: cell.y * 20 + 1,
+      }),
+    );
+  }
+
+  svg.append(
+    defs,
+    clipped,
+    svgElement("circle", {
+      cx: 50,
+      cy: 50,
+      fill: "none",
+      r: 48,
+      stroke: avatar.accent,
+      "stroke-width": 4,
+    }),
+  );
+
+  return svg;
+}
+
+function avatarDetails(avatar) {
+  const table = document.createElement("table");
+  const tbody = document.createElement("tbody");
+  tbody.append(
+    row([text("Key"), code(avatar.key)]),
+    row([text("Seed"), code(avatar.seed)]),
+    row([text("Background"), code(avatar.background)]),
+    row([text("Foreground"), code(avatar.foreground)]),
+    row([text("Accent"), code(avatar.accent)]),
+  );
+  table.append(tbody);
+  return table;
+}
+
+function avatarPalette(avatar) {
+  const container = document.createElement("span");
+  container.append(
+    smallSwatch(avatar.background),
+    text(" "),
+    smallSwatch(avatar.foreground),
+    text(" "),
+    smallSwatch(avatar.accent),
+  );
+  return container;
+}
+
 function row(cells) {
   const tr = document.createElement("tr");
   tr.append(...cells.map((child) => cell(child)));
@@ -100,6 +212,23 @@ function swatch(cssColor) {
   output.style.height = "3rem";
   output.style.width = "5rem";
   return output;
+}
+
+function smallSwatch(cssColor) {
+  const output = swatch(cssColor);
+  output.style.height = "1.5rem";
+  output.style.width = "1.5rem";
+  return output;
+}
+
+function svgElement(name, attributes = {}) {
+  const element = document.createElementNS("http://www.w3.org/2000/svg", name);
+
+  for (const [attribute, value] of Object.entries(attributes)) {
+    element.setAttribute(attribute, value);
+  }
+
+  return element;
 }
 
 function code(value) {

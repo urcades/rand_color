@@ -78,6 +78,41 @@
       </section>
 
       <section>
+        <h2>UUID-style avatar</h2>
+        <fieldset>
+          <legend>Avatar key</legend>
+          <label>
+            Key
+            <input
+              id="avatar-key"
+              type="text"
+              value="7f35a4db-9d18-4696-bf5a-fc4e835ef9bd"
+              size="40"
+            />
+          </label>
+          <button id="avatar-generate" type="button">Generate avatar</button>
+        </fieldset>
+
+        <div id="avatar-output"></div>
+
+        <h3>Rust call</h3>
+        <pre id="avatar-snippet"></pre>
+
+        <h3>Sample keys</h3>
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Avatar</th>
+              <th scope="col">Key</th>
+              <th scope="col">Seed</th>
+              <th scope="col">Colors</th>
+            </tr>
+          </thead>
+          <tbody id="avatar-samples"></tbody>
+        </table>
+      </section>
+
+      <section>
         <h2>RGB &lt;-&gt; HSL conversion</h2>
         <fieldset>
           <legend>RGB input</legend>

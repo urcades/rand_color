@@ -1,5 +1,5 @@
 use rand::rngs::StdRng;
-use rand::SeedableRng;
+use rand::{Rng, SeedableRng};
 use rand_color::convert::{hsl_to_rgb, rgb_to_hsl};
 use rand_color::{hsl, hsv, hwb, lab, lch, oklab, oklch, rgb};
 use serde::Serialize;
@@ -30,6 +30,24 @@ struct ConversionResult {
     delta: String,
     input_css: String,
     round_trip_css: String,
+    snippet: String,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+struct AvatarCell {
+    x: u8,
+    y: u8,
+    fill: &'static str,
+}
+
+#[derive(Serialize)]
+struct AvatarResult {
+    key: String,
+    seed: String,
+    background: String,
+    foreground: String,
+    accent: String,
+    cells: Vec<AvatarCell>,
     snippet: String,
 }
 
@@ -97,6 +115,41 @@ pub fn convert_rgb_to_hsl(red: u8, green: u8, blue: u8, alpha: f32) -> Result<Js
     };
 
     serde_wasm_bindgen::to_value(&result).map_err(|error| JsValue::from_str(&error.to_string()))
+}
+
+#[wasm_bindgen]
+pub fn generate_avatar(key: &str) -> Result<JsValue, JsValue> {
+    let key = normalized_avatar_key(key);
+    let seed = stable_hash(&key);
+    let mut rng = StdRng::seed_from_u64(seed);
+
+    let background = avatar_color(
+        hsl::HslRange::new(0.0, 360.0, 35.0, 80.0, 84.0, 96.0, 1.0, 1.0)
+            .expect("avatar background range should be valid"),
+        &mut rng,
+    )?;
+    let foreground = avatar_color(
+        hsl::HslRange::new(0.0, 360.0, 45.0, 95.0, 24.0, 48.0, 1.0, 1.0)
+            .expect("avatar foreground range should be valid"),
+        &mut rng,
+    )?;
+    let accent = avatar_color(
+        hsl::HslRange::new(0.0, 360.0, 55.0, 95.0, 48.0, 68.0, 1.0, 1.0)
+            .expect("avatar accent range should be valid"),
+        &mut rng,
+    )?;
+
+    let avatar = AvatarResult {
+        key: key.clone(),
+        seed: format!("{seed:016x}"),
+        background: background.to_hsla_string(),
+        foreground: foreground.to_hsla_string(),
+        accent: accent.to_hsla_string(),
+        cells: avatar_cells(&mut rng),
+        snippet: avatar_snippet(&key),
+    };
+
+    serde_wasm_bindgen::to_value(&avatar).map_err(|error| JsValue::from_str(&error.to_string()))
 }
 
 fn generate_one(space: &str, rng: &mut StdRng) -> Result<DemoColor, String> {
@@ -264,4 +317,127 @@ fn snippet(function: &str, seed: u32) -> String {
     format!(
         "use rand::rngs::StdRng;\nuse rand::SeedableRng;\n\nlet mut rng = StdRng::seed_from_u64({seed});\nlet color = {function}(&mut rng);"
     )
+}
+
+fn avatar_color<R: Rng + ?Sized>(
+    range: hsl::HslRange,
+    rng: &mut R,
+) -> Result<hsl::HslColor, JsValue> {
+    hsl::random_hsl_in_with_rng(range, rng).map_err(|error| JsValue::from_str(&error.to_string()))
+}
+
+fn avatar_cells<R: Rng + ?Sized>(rng: &mut R) -> Vec<AvatarCell> {
+    let mut cells = Vec::new();
+
+    for y in 0..5 {
+        for x in 0..3 {
+            if rng.gen_bool(0.58) {
+                let fill = if rng.gen_bool(0.18) {
+                    "accent"
+                } else {
+                    "foreground"
+                };
+                cells.push(AvatarCell { x, y, fill });
+
+                let mirror_x = 4 - x;
+                if mirror_x != x {
+                    cells.push(AvatarCell {
+                        x: mirror_x,
+                        y,
+                        fill,
+                    });
+                }
+            }
+        }
+    }
+
+    if cells.is_empty() {
+        cells.push(AvatarCell {
+            x: 2,
+            y: 2,
+            fill: "foreground",
+        });
+    }
+
+    cells
+}
+
+fn normalized_avatar_key(key: &str) -> String {
+    let key = key.trim();
+    if key.is_empty() {
+        "rand_color".to_string()
+    } else {
+        key.to_string()
+    }
+}
+
+fn stable_hash(input: &str) -> u64 {
+    const FNV_OFFSET: u64 = 14_695_981_039_346_656_037;
+    const FNV_PRIME: u64 = 1_099_511_628_211;
+
+    input.as_bytes().iter().fold(FNV_OFFSET, |hash, byte| {
+        (hash ^ u64::from(*byte)).wrapping_mul(FNV_PRIME)
+    })
+}
+
+fn avatar_snippet(key: &str) -> String {
+    format!(
+        "use rand::rngs::StdRng;\nuse rand::SeedableRng;\nuse rand_color::hsl::{{random_hsl_in_with_rng, HslRange}};\n\nlet seed = stable_hash({});\nlet mut rng = StdRng::seed_from_u64(seed);\nlet background = random_hsl_in_with_rng(\n    HslRange::new(0.0, 360.0, 35.0, 80.0, 84.0, 96.0, 1.0, 1.0).unwrap(),\n    &mut rng,\n).unwrap();",
+        rust_string_literal(key)
+    )
+}
+
+fn rust_string_literal(value: &str) -> String {
+    let mut output = String::from("\"");
+
+    for character in value.chars() {
+        match character {
+            '\\' => output.push_str("\\\\"),
+            '"' => output.push_str("\\\""),
+            '\n' => output.push_str("\\n"),
+            '\r' => output.push_str("\\r"),
+            '\t' => output.push_str("\\t"),
+            character => output.push(character),
+        }
+    }
+
+    output.push('"');
+    output
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn stable_hash_is_known_for_demo_key() {
+        assert_eq!(
+            stable_hash("7f35a4db-9d18-4696-bf5a-fc4e835ef9bd"),
+            0x44df_fd35_42cc_fca4
+        );
+    }
+
+    #[test]
+    fn avatar_cells_are_mirrored_across_center_column() {
+        let mut rng = StdRng::seed_from_u64(42);
+        let cells = avatar_cells(&mut rng);
+
+        for cell in &cells {
+            let mirror_x = 4 - cell.x;
+            assert!(
+                cells.iter().any(|other| other.x == mirror_x
+                    && other.y == cell.y
+                    && other.fill == cell.fill),
+                "missing mirror for {cell:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn rust_string_literal_escapes_special_characters() {
+        assert_eq!(
+            rust_string_literal("avatar \"one\"\nnext"),
+            "\"avatar \\\"one\\\"\\nnext\""
+        );
+    }
 }

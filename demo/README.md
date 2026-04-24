@@ -34,6 +34,7 @@ builds the WASM demo and deploys `demo/site` on pushes to `master`.
 
 - seeded generation across all color spaces
 - crate output strings versus browser preview CSS
+- deterministic UUID-style avatars from string keys
 - RGB <-> HSL conversion and round-trip deltas
 - the project caveat that generation is numeric-range sampling, not color
   management or palette design
