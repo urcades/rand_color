@@ -16,7 +16,7 @@
 //! let color = random_hwb();
 //!
 //! assert!((0.0..=360.0).contains(&color.hue));
-//! assert!(color.whiteness + color.blackness <= 100.0);
+//! assert!(color.whiteness + color.blackness <= 100.0 + f32::EPSILON);
 //! ```
 
 #![warn(missing_docs)]

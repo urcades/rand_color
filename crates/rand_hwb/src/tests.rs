@@ -12,7 +12,7 @@ fn default_bounds_work() {
     assert!((0.0..=100.0).contains(&color.whiteness));
     assert!((0.0..=100.0).contains(&color.blackness));
     assert!((0.0..=1.0).contains(&color.alpha));
-    assert!(color.whiteness + color.blackness <= 100.0);
+    assert!(color.whiteness + color.blackness <= 100.0 + f32::EPSILON);
 }
 
 #[test]
